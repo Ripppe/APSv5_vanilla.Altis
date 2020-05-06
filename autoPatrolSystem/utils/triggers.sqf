@@ -1,5 +1,5 @@
 RAP_fnc_createBaseTrigger = {
-	if (isNil "RAP_BASE_TRIGGER") then {
+	if (isNil "RAP_BASE_TRIGGER" && isServer) then {
 		RAP_BASE_TRIGGER = ([RAP_BASE_CENTER_LOCATION, 
 		"AREA:", 
 		[100, 100, 0, false],
