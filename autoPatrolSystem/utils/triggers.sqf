@@ -11,5 +11,5 @@ RAP_fnc_createBaseTrigger = {
 		"hint 'base deinitialized'"]] call CBA_fnc_createTrigger) select 0;
 
 		RAP_BASE_TRIGGER setTriggerInterval 60;
-	}
+	};
 };
