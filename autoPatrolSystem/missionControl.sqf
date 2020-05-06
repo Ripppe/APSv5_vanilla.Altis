@@ -1,0 +1,2 @@
+execVM "autoPatrolSystem\missionParams.sqf";
+
