@@ -2,6 +2,7 @@
 RAP_BASE_CENTER_LOCATION = getPos ammo1;
 
 RAP_PATROL_INITIALIZED = false;
+RAP_DEBUG_ON = true;
 
 // Triggers
 RAP_BASE_TRIGGER = nil;

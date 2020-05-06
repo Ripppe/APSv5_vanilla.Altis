@@ -3,6 +3,7 @@
 sleep 10;
 
 // Load functions
+execVM "autoPatrolSystem\utils\misc.sqf";
 execVM "autoPatrolSystem\utils\triggers.sqf";
 execVM "autoPatrolSystem\utils\missionFlow.sqf";
 

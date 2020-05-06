@@ -6,8 +6,8 @@ RAP_fnc_createBaseTrigger = {
 		"ACT:",
 		["NONE", "PRESENT", true],
 		"STATE:",
-		["[] call RAP_fnc_isPatrolinProgress",
-		"hint 'base initialized'",
+		["[] call RAP_fnc_isPatrolInProgress",
+		"[] call RAP_fnc_initializePatrol",
 		"hint 'base deinitialized'"]] call CBA_fnc_createTrigger) select 0;
 
 		RAP_BASE_TRIGGER setTriggerInterval 60;
