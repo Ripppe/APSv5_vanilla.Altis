@@ -17,6 +17,10 @@ RAP_fnc_initializePatrol = {
 
 	// Create patrol initial groups
 	[5] call RAP_fnc_createPatrolGroups;
+
+	// Get phasing associated to the patrol type
+	RAP_PATROL_TASKS = [RAP_PATROL_PHASING, RAP_PATROL_TYPE] call CBA_fnc_hashGet;
+	
 };
 
 RAP_fnc_createPatrolGroups = {
@@ -92,5 +96,10 @@ RAP_fnc_selectPatrolZone = {
 };
 
 RAP_fnc_generateFlowTriggers = {
-	params ["_tasks", "_patrolObjLocation"];	
+	params ["_tasks", "_patrolObjLocation"];
+
+	RAP_PATROL_CURRENT_TASK = _tasks deleteAt 0;
+	switch (RAP_PATROL_CURRENT_TASK) do {
+		case RAP_PATROL_TASK_MOVE_TO_FUP: {};
+	};
 };
