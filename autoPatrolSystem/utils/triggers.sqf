@@ -15,7 +15,3 @@ RAP_fnc_createBaseTrigger = {
 		RAP_G_TRIGGERS_BASE setTriggerInterval 60;
 	};
 };
-
-RAP_fnc_createMoveToFUPTrigger = {
-
-};

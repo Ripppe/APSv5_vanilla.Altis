@@ -1,5 +1,5 @@
-RAP_fnc_tasks_moveToFUP = {
-	params ["_controlTrigger", "_fup"];
+RAP_fnc_actions_move = {
+	params ["_controlTrigger", "_targetPos"];
 
 	private _enroute = _controlTrigger getVariable "moveOrderIssued";
 
@@ -7,7 +7,7 @@ RAP_fnc_tasks_moveToFUP = {
 		{
 			_x params ["_group"];
 
-			private _destination = [_fup, 10, 50] call BIS_fnc_findSafePos;
+			private _destination = [_targetPos, 10, 50] call BIS_fnc_findSafePos;
 
 			private _wp = [_group, _destination, 10, "MOVE", "AWARE", "WHITE", "STAG COLUMN"] call CBA_fnc_addWaypoint;
 			_wp setWaypointCompletionRadius 5;

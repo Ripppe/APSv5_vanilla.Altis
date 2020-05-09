@@ -8,7 +8,7 @@ RAP_fnc_initializePatrol = {
 	RAP_PATROL_INITIALIZED = true;
 	[] call RAP_fnc_resetPatrolParams;
 
-	// Select patrol type
+	// Select patrol type/task
 	RAP_PATROL_TYPE = [] call RAP_fnc_selectPatrolType;
 	// Select patrol zone
 	RAP_PATROL_LOCATION = [RAP_PATROL_TYPE] call RAP_fnc_selectPatrolZone;
@@ -16,10 +16,10 @@ RAP_fnc_initializePatrol = {
 	[RAP_PATROL_LOCATION] call RAP_fnc_initializePatrolMarker;
 
 	// Create patrol initial groups
-	[5] call RAP_fnc_createPatrolGroups;
+	[7] call RAP_fnc_createPatrolGroups;
 
 	// Get phasing associated to the patrol type
-	RAP_PATROL_TASKS = [RAP_PATROL_PHASING, RAP_PATROL_TYPE] call CBA_fnc_hashGet;
+	RAP_PATROL_TASKS = [RAP_PATROL_PHASES, RAP_PATROL_TYPE] call CBA_fnc_hashGet;
 	
 };
 
