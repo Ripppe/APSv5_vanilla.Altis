@@ -11,6 +11,9 @@ RAP_PATROL_TYPE = nil;
 RAP_PATROL_CURRENT_TASK = nil;
 RAP_PATROL_TASKS = [];
 
+RAP_PATROL_FORCES = [] call CBA_fnc_hashCreate;
+RAP_PATROL_ACTION_PARAMS = [] call CBA_fnc_hashCreate;
+
 // Format [<control trigger>, <phase termination trigger>]
 RAP_PATROL_TASK_TRIGGERS = [];
 
@@ -24,8 +27,11 @@ RAP_fnc_resetPatrolParams = {
 
 	// Reset patrol triggers
 	{
-		
+
 	} forEach (allMissionObjects "EmptyDetector");
+
+	// FIXME: Make sure each groups of every force is despawned
+	RAP_PATROL_FORCES = [] call CBA_fnc_hashCreate;
 };
 
 RAP_PATROL_TASK_ATTACK = "TASK-ATTACK";
@@ -37,3 +43,5 @@ RAP_PATROL_TASK_PHASE_RTB = "PHASE-RETURN-TO-BASE";
 
 RAP_PATROL_ATTACK_PHASES = [RAP_PATROL_TASK_PHASE_MOVE_TO_FUP, RAP_PATROL_TASK_PHASE_ATTACK, RAP_PATROL_TASK_PHASE_SECURE];
 RAP_PATROL_PHASES = [[RAP_G_PATROL_TYPE_ATTACK, [RAP_PATROL_ATTACK_PHASES]]] call CBA_fnc_hashCreate;
+
+RAP_PATROL_ACTION_MOVE = "MOVE";
