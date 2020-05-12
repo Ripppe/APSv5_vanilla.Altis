@@ -15,8 +15,9 @@ RAP_fnc_initializePatrol = {
 	// Create patrol marker
 	[RAP_PATROL_LOCATION] call RAP_fnc_initializePatrolMarker;
 
-	// Create patrol initial groups
-	[7] call RAP_fnc_createPatrolGroups;
+	// Create patrol initial group
+	//[7] call RAP_fnc_createPatrolGroups;
+	[35] call RAP_fnc_createPatrolGroup;
 
 	// Get phasing associated to the patrol type
 	RAP_PATROL_TASKS = [RAP_PATROL_PHASES, RAP_PATROL_TYPE] call CBA_fnc_hashGet;
@@ -29,6 +30,23 @@ RAP_fnc_createPatrolGroups = {
 	for [{private _counter = 0}, {_counter < _groupCount}, {_counter = _counter + 1}] do {
 		[RAP_PATROL_GROUPS] call RAP_fnc_createSinglePatrolGroup;
 	}; 
+};
+
+RAP_fnc_createPatrolGroup = {
+	params ["unitCount",
+	["_composition", ["I_soldier_F", "I_support_MG_F", "I_Soldier_GL_F", "I_Soldier_M_F", "I_medic_F"]],
+	["_location", RAP_BASE_CENTER_LOCATION]];
+	
+	private _units = [];
+	private _compositionCount = count _composition;
+	for [{private _counter = 0}, {_counter <= unitCount}, {_counter = _counter + 1}] do {
+		private _index = if (_counter >= _compositionCount) then { (_counter % _compositionCount) - 1; } else { _counter };
+		_units pushBack (_composition select _index);
+	};
+
+	private _patrolGroup = [independent, _units, _location, 50] call RAP_fnc_createGroup;
+
+	[RAP_PATROL_FORCE, "mainGroup", _patrolGroup] call CBA_fnc_hashSet;
 };
 
 RAP_fnc_createSinglePatrolGroup = {

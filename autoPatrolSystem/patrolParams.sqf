@@ -1,17 +1,10 @@
-/**
-	Each item represents one group attached to the current patrolPointsTaken
-
-	Format will be:
-
-	[<group>, [<group initial size>, <group last location>]]
- */
 RAP_PATROL_GROUPS = [];
 RAP_PATROL_LOCATION = nil;
 RAP_PATROL_TYPE = nil;
 RAP_PATROL_CURRENT_TASK = nil;
 RAP_PATROL_TASKS = [];
 
-RAP_PATROL_FORCES = [] call CBA_fnc_hashCreate;
+RAP_PATROL_FORCE = [] call CBA_fnc_hashCreate;
 RAP_PATROL_ACTION_PARAMS = [] call CBA_fnc_hashCreate;
 
 // Format [<control trigger>, <phase termination trigger>]
@@ -31,7 +24,7 @@ RAP_fnc_resetPatrolParams = {
 	} forEach (allMissionObjects "EmptyDetector");
 
 	// FIXME: Make sure each groups of every force is despawned
-	RAP_PATROL_FORCES = [] call CBA_fnc_hashCreate;
+	RAP_PATROL_FORCE = [] call CBA_fnc_hashCreate;
 };
 
 RAP_PATROL_TASK_ATTACK = "TASK-ATTACK";
