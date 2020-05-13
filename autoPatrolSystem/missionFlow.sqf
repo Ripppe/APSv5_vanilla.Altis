@@ -17,7 +17,7 @@ RAP_fnc_initializePatrol = {
 
 	// Create patrol initial group
 	//[7] call RAP_fnc_createPatrolGroups;
-	[35] call RAP_fnc_createPatrolGroup;
+	//[35] call RAP_fnc_createPatrolGroup;
 
 	// Get phasing associated to the patrol type
 	RAP_PATROL_TASKS = [RAP_PATROL_PHASES, RAP_PATROL_TYPE] call CBA_fnc_hashGet;
