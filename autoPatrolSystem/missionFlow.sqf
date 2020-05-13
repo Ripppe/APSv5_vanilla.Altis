@@ -45,6 +45,7 @@ RAP_fnc_createPatrolGroup = {
 	};
 
 	private _patrolGroup = [independent, _units, _location, 50] call RAP_fnc_createGroup;
+	_patrolGroup setName "PatrolMainForce";
 
 	[RAP_PATROL_FORCE, "mainGroup", _patrolGroup] call CBA_fnc_hashSet;
 };
