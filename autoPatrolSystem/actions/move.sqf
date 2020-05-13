@@ -56,6 +56,7 @@ RAP_fnc_neutralizeMovementThreat = {
 	[_group] call CBA_fnc_clearWaypoints;
 
 	//Attack or defend?
+	[_group, _group, 50, 3, 0.25, 0.5] call CBA_fnc_taskDefend;
 
 	private _threat = nil
 	waitUntil { 
@@ -65,6 +66,8 @@ RAP_fnc_neutralizeMovementThreat = {
 		_threat = [_group, _meta] call RAP_fnc_identifyThreatForMovement;
 		!isNil "_threat";
 	};
+
+	[_group] call CBA_fnc_clearWaypoints;
 };
 
 RAP_fnc_moveController = {
