@@ -33,19 +33,22 @@ RAP_fnc_createPatrolGroups = {
 };
 
 RAP_fnc_createPatrolGroup = {
-	params ["unitCount",
+	params ["_unitCount",
 	["_composition", ["I_soldier_F", "I_support_MG_F", "I_Soldier_GL_F", "I_Soldier_M_F", "I_medic_F"]],
 	["_location", RAP_BASE_CENTER_LOCATION]];
 	
+	["Create new patrol group at %1 from composition %2", [_location, _composition]] call RAP_fnc_debugLog;
 	private _units = [];
 	private _compositionCount = count _composition;
-	for [{private _counter = 0}, {_counter <= unitCount}, {_counter = _counter + 1}] do {
-		private _index = if (_counter >= _compositionCount) then { (_counter % _compositionCount) - 1; } else { _counter };
+	for [{private _counter = 0}, {_counter <= _unitCount}, {_counter = _counter + 1}] do {
+		private _index = if (_counter >= _compositionCount) then { _counter % _compositionCount; } else { _counter };
 		_units pushBack (_composition select _index);
 	};
 
+	["Selected units: %1", [_units]] call RAP_fnc_debugLog;
+
 	private _patrolGroup = [independent, _units, _location, 50] call RAP_fnc_createGroup;
-	_patrolGroup setName "PatrolMainForce";
+	//_patrolGroup setName "PatrolMainForce";
 
 	[RAP_PATROL_FORCE, "mainGroup", _patrolGroup] call CBA_fnc_hashSet;
 };
