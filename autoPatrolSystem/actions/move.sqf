@@ -136,7 +136,8 @@ RAP_fnc_moveController = {
 
 RAP_fnc_moveControlTester = {
 	params ["_location"];
-	private _testGroup = (missionNamespace getVariable ["Force-1", objNull]) call CBA_fnc_getGroup;
+	//private _testGroup = (missionNamespace getVariable ["PatrolMainForce", objNull]) call CBA_fnc_getGroup;
+	private _testGroup = [RAP_PATROL_FORCE, "mainGroup"] call CBA_fnc_hashGet;
 	private _testHash = [] call CBA_fnc_hashCreate;
 	[_testGroup, _location, _testHash] spawn RAP_fnc_moveController;
 
