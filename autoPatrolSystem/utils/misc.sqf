@@ -4,7 +4,9 @@ RAP_fnc_debugLog = {
 		private _formattedMsg = if ([_arguments] call RAP_fnc_isEmptyArray) then {
 			_message;
 		} else {
-			format ([_message] append _arguments);
+			private _messageArr = [_message];
+			_messageArr append _arguments;
+			format _messageArr;
 		};
 		_formattedMsg = ["DEBUG",  _formattedMsg] joinString " --- ";
 
