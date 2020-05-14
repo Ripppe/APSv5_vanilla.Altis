@@ -126,11 +126,12 @@ RAP_fnc_generateFlowTriggers = {
 
 
 
+MY_TEST_HASH = [] call CBA_fnc_hashCreate;
 RAP_fnc_hashTest = {
 	params ["_hash"];
 
 	private _counter = 0;
-	while {counter < 100} do {
+	while {_counter < 100} do {
 		_counter = _counter + 1;
 		[_hash, "test", random [0, 50, 100]] call CBA_fnc_hashSet;
 		sleep 5;
@@ -138,8 +139,5 @@ RAP_fnc_hashTest = {
 };
 
 RAP_fnc_hashTestStart = {
-	private _hash = [] call CBA_fnc_hashCreate;
-	[_hash] spawn RAP_fnc_hashTest;
-	
-	_hash;
-}
+	[MY_TEST_HASH] spawn RAP_fnc_hashTest;
+};
