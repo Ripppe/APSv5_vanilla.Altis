@@ -126,6 +126,18 @@ RAP_fnc_generateFlowTriggers = {
 	};
 };
 
+RAP_fnc_despawnForceGroup = {
+	{
+		private _group = [RAP_PATROL_FORCE, _x] call CBA_fnc_hashGet;
+		{
+			deleteVehicle _x;
+		} forEach units _group;
+
+		deleteGroup _group;
+	} forEach ([RAP_PATROL_FORCE] call CBA_fnc_hashKeys);
+
+	RAP_PATROL_FORCE = [] call CBA_fnc_hashCreate;;
+};
 
 
 
