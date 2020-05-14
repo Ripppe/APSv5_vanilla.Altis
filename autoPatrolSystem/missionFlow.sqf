@@ -122,3 +122,24 @@ RAP_fnc_generateFlowTriggers = {
 		case RAP_PATROL_TASK_MOVE_TO_FUP: {};
 	};
 };
+
+
+
+
+RAP_fnc_hashTest = {
+	params ["_hash"];
+
+	private _counter = 0;
+	while {counter < 100} do {
+		_counter = _counter + 1;
+		[_hash, "test", random [0, 50, 100]] call CBA_fnc_hashSet;
+		sleep 5;
+	};
+};
+
+RAP_fnc_hashTestStart = {
+	private _hash = [] call CBA_fnc_hashCreate;
+	[_hash] spawn RAP_fnc_hashTest;
+	
+	_hash;
+}
