@@ -18,7 +18,7 @@ RAP_fnc_preMove = {
 
 	private _movementType = [_meta, "movementType"] call CBA_fnc_hashGet;
 
-	if (_movementType == "STEALTH" OR _movementType == "LINK-UP") exitWith {
+	if (_movementType == "STEALTH" or _movementType == "LINK-UP") exitWith {
 		true;
 	};
 
