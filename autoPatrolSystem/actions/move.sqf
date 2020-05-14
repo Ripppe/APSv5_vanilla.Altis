@@ -39,10 +39,16 @@ RAP_fnc_preMove = {
 
 RAP_fnc_identifyThreatForMovement = {
 	params ["_group", "_meta"];
-	private _threat = _group findNearestEnemy _group;
+	private _threat = nil;
+	private _unit = (units _group) findIf {
+		private _closestThreat = _x findNearestEnemy _group;
+		if (!isNil "_closestThreat" && ([_group, _closestThreat] call CBA_fnc_getDistance <= 400)) then {
+			_threat = _closestThreat;
+		};
+	};
 
 	// Group knows about an enemy, check if they are nearer than a treshold
-	if (!isNil "_threat" && ([_group, _threat] call CBA_fnc_getDistance <= 400)) then {
+	if (_unit != -1) then {
 		_threat;
 	};
 };
