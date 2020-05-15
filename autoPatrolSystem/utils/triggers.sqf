@@ -17,24 +17,6 @@ RAP_fnc_createBaseTrigger = {
 	};
 };
 
-RAP_fnc_createMoveOrderSuccessTrigger = {
-	params ["_targetLocation", "_groups", "_controlObject"];
-
-	private _trigger = ([_targetLocation, 
-		"AREA:", 
-		[100, 100, 0, false],
-		"ACT:",
-		["GUER", "PRESENT", false],
-		"STATE:",
-		["(_thisList arrayIntersect _groups)",
-		"_controlObject setVariable [""moveCompleted"", true]",
-		""],
-		"NAME:",
-		"RAP_TRIGGER_BASE"] call CBA_fnc_createTrigger) select 0;
-
-	_trigger setTriggerTimeout [3, 5, 7, false];
-};
-
 RAP_fnc_createAttackTaskControlTrigger = {
 	params ["_attackTarget"];
 
