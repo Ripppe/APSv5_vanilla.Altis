@@ -9,3 +9,10 @@ execVM "autoPatrolSystem\missionFlow.sqf";
 
 // initialise APS
 execVM "autoPatrolSystem\missionControl.sqf";
+execVM "autoPatrolSystem\patrolCommander.sqf";
+
+waitUntil {
+	!isNil "RAP_BASE_CENTER_LOCATION";
+};
+
+[] call RAP_fnc_createBaseTrigger;
