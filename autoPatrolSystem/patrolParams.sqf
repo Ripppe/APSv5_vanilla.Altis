@@ -5,7 +5,7 @@ RAP_PATROL_CURRENT_TASK = nil;
 RAP_PATROL_TASKS = [];
 
 RAP_PATROL_FORCE = [] call CBA_fnc_hashCreate;
-RAP_PATROL_ACTION_PARAMS = [] call CBA_fnc_hashCreate;
+RAP_PATROL_FORCE_META = [] call CBA_fnc_hashCreate;
 
 // Format [<control trigger>, <phase termination trigger>]
 RAP_PATROL_TASK_TRIGGERS = [];
@@ -25,6 +25,8 @@ RAP_fnc_resetPatrolParams = {
 
 	// FIXME: Make sure each groups of every force is despawned
 	RAP_PATROL_FORCE = [] call CBA_fnc_hashCreate;
+
+	RAP_PATROL_FORCE_META = [] call CBA_fnc_hashCreate;
 };
 
 RAP_PATROL_TASK_ATTACK = "TASK-ATTACK";
