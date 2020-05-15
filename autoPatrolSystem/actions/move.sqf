@@ -96,6 +96,7 @@ RAP_fnc_neutralizeMovementThreat = {
 RAP_fnc_moveController = {
 	params ["_group", "_targetPos", "_actionMeta"];
 
+	scriptName "RAP_fnc_moveController";
 	/**
 		The flow of move:
 
@@ -138,6 +139,7 @@ RAP_fnc_moveController = {
 
 RAP_fnc_moveContingencyController = {
 	params ["_group", "_targetPos", "_moveHandle", "_actionMeta"];
+	scriptName "RAP_fnc_moveContingencyController";
 	private _threat = nil;
 
 	waitUntil {
@@ -167,6 +169,7 @@ RAP_fnc_actionsMoveInit = {
 		(2) Start contingency controller
 	*/
 
+	[_actionMeta] call RAP_fnc_actionsResetHandles;
 	private _moveHandle = [_group, _targetPos, _actionMeta] spawn RAP_fnc_moveController;
 	[_actionMeta, "HANDLES", _moveHandle] call RAP_fnc_pushBackToHash;
 	private _contingencyHandle = [_group, _moveHandle, _actionMeta] spawn RAP_fnc_moveContingencyController;

@@ -7,4 +7,16 @@ RAP_fnc_actionsInitMeta = {
 	_actionMeta;
 };
 
+RAP_fnc_actionsResetHandles = {
+	params ["_actionMeta"];
+
+	{
+		if (!scriptDone _x) then {
+			terminate _x;
+		};
+	} forEach ([_actionMeta, "HANDLES"] call CBA_fnc_hashGet);
+
+	[_actionMeta, "HANDLES", []] call CBA_fnc_hashSet;
+};
+
 execVM "autoPatrolSystem\actions\move.sqf";

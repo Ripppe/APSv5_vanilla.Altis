@@ -13,7 +13,7 @@ RAP_fnc_initializePatrol = {
 	// Select patrol zone
 	RAP_PATROL_LOCATION = [RAP_PATROL_TYPE] call RAP_fnc_selectPatrolZone;
 	// Create patrol marker
-	[RAP_PATROL_LOCATION] call RAP_fnc_initializePatrolMarker;
+	[RAP_PATROL_LOCATION] call RAP_fnc_initializePatrolMarkers;
 
 	// Create patrol initial group
 	//[7] call RAP_fnc_createPatrolGroups;
@@ -112,20 +112,13 @@ RAP_fnc_selectPatrolZone = {
 		_dist >= _minDist;
 	};
 
-	if (_selectedLocation == -1) then {
+	private _selectedLocation = if (_selectedLocation == -1) then {
 		selectRandom _possibleLocations;
 	} else {
 		_possibleLocations select [_selectedLocation];
 	};
-};
 
-RAP_fnc_generateFlowTriggers = {
-	params ["_tasks", "_patrolObjLocation"];
-
-	RAP_PATROL_CURRENT_TASK = _tasks deleteAt 0;
-	switch (RAP_PATROL_CURRENT_TASK) do {
-		case RAP_PATROL_TASK_MOVE_TO_FUP: {};
-	};
+	locationPosition _selectedLocation;
 };
 
 RAP_fnc_despawnForceGroup = {
@@ -139,22 +132,4 @@ RAP_fnc_despawnForceGroup = {
 	} forEach ([RAP_PATROL_FORCE] call CBA_fnc_hashKeys);
 
 	RAP_PATROL_FORCE = [] call CBA_fnc_hashCreate;;
-};
-
-
-
-MY_TEST_HASH = [] call CBA_fnc_hashCreate;
-RAP_fnc_hashTest = {
-	params ["_hash"];
-
-	private _counter = 0;
-	while {_counter < 100} do {
-		_counter = _counter + 1;
-		[_hash, "test", random [0, 50, 100]] call CBA_fnc_hashSet;
-		sleep 5;
-	};
-};
-
-RAP_fnc_hashTestStart = {
-	[MY_TEST_HASH] spawn RAP_fnc_hashTest;
 };
