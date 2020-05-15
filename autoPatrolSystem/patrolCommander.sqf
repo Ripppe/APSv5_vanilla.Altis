@@ -65,7 +65,7 @@ RAP_fnc_patrolCommanderTerminate = {
 
 	[RAP_PATROL_FORCE_META] call RAP_fnc_patrolCommanderTerminateTask;
 
-	if (!scriptDone _commanderHandle) {
+	if (!scriptDone _commanderHandle) then {
 		terminate _commanderHandle;
 	};
 };
