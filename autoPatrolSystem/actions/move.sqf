@@ -3,59 +3,75 @@ RAP_fnc_hasTransportCapability = {
 };
 
 RAP_fnc_move = {
-	params ["_group", "_targetPos", "_meta"];
+	params ["_group", "_targetPos", "_actionMeta"];
 
-	private _movementType = [_meta, "movementType"] call CBA_fnc_hashGet;
-	private _destination = [_targetPos, 10, 50] call BIS_fnc_findSafePos;
+	[_actionMeta, "PHASE", "EXE"] call CBA_fnc_hashSet;
+	private _movementType = [_actionMeta, "movementType"] call CBA_fnc_hashGet;
+	private _destination = [_targetPos, 0, 50, 2] call BIS_fnc_findSafePos;
 
 	private _wp = [_group, _destination, 10, "MOVE", "AWARE", "WHITE", "STAG COLUMN"] call CBA_fnc_addWaypoint;
-	_wp setWaypointStatements ["true", "[_meta, ""moveCompleted"", true] call CBA_fnc_hashSet"];
+	_wp setWaypointStatements ["true", "[_actionMeta, ""moveCompleted"", true] call CBA_fnc_hashSet"];
 	//_wp setWaypointCompletionRadius 5;
 };
 
 RAP_fnc_preMove = {
-	params ["_group", "_targetPos", "_meta"];
+	params ["_group", "_targetPos", "_actionMeta"];
 
-	private _movementType = [_meta, "movementType"] call CBA_fnc_hashGet;
+	/**
+		PRE-MOVE should consider the following
 
-	if (_movementType == "STEALTH" or _movementType == "LINK-UP") exitWith {
+		Does group have organic transportation?
+		If group has organic transportation, does it provide enough space? If not, request resupply
+		If group hasn't organic transportation, check if transportation has been asked and granted
+		If transportation has been granted, does it provide enough space? If not, and there is no need for ride
+		disband transportation back. Otherwise request resupply.
+		If transportation hasn't been granted, continue.
+
+		The need for external transportation is relevant to the distance to the objective.
+		If transportation has been granted, link up the group with it
+		Once transportation and the group are close enough, get in if necessary? (If transportation is attached
+		to the group, do they automatically use it?)
+	*/
+
+	private _movementType = [_actionMeta, "movementType"] call CBA_fnc_hashGet;
+
+	if (["STEALTH", "LINK-UP"] find _movementType != -1) exitWith {
 		true;
 	};
+
+	private _transportationAllowed = [_actionMeta, "transportationAllowed"] call CBA_fnc_hashGet;
 
 	// Measure group's dist to target pos
 	private _distance = [_group, _targetPos] call CBA_fnc_getDistance;
 
 	if (_distance > 1000) then {
-		// We really should call a transport...
-		/** The flow here:
-			- Is the group under a direct threat -> if yes, clear it first
-			- Count the needed space for transportation
-			- Send request
-			- Wait for the response
-			- If response is affirmative, order the group to link up with the force
-		*/
+
 	};
 };
 
 RAP_fnc_identifyThreatForMovement = {
-	params ["_group", "_meta"];
+	params ["_group", "_threatDistance", "_actionMeta"];
+
 	private _threat = nil;
 	private _unit = (units _group) findIf {
 		private _closestThreat = _x findNearestEnemy _group;
-		if (!isNil "_closestThreat" && ([_group, _closestThreat] call CBA_fnc_getDistance <= 400)) then {
+		if (!isNil "_closestThreat" && ([_group, _closestThreat] call CBA_fnc_getDistance <= _threatDistance)) then {
 			_threat = _closestThreat;
 		};
 	};
-
+	
 	// Group knows about an enemy, check if they are nearer than a treshold
 	if (_unit != -1) then {
 		_threat;
 	};
+	
 };
 
 RAP_fnc_neutralizeMovementThreat = {
-	params ["_group", "_nearestTarget", "_meta"];
+	params ["_group", "_nearestTarget", "_actionMeta"];
 
+	private _startTimestamp = diag_tickTime;
+	[_actionMeta, "COMPROMISE-ELAPSED", 0] call CBA_fnc_hashSet;
 	// Possibly dangerous target is recognized, what to do?
 
 	// Clear waypoints...
@@ -68,8 +84,9 @@ RAP_fnc_neutralizeMovementThreat = {
 	waitUntil { 
 		sleep 10;
 
+		[_actionMeta, "COMPROMISE-ELAPSED", diag_tickTime - _startTimestamp] call CBA_fnc_hashSet;
 		// Check targets, if none, all known threats have been dealt with -> continue
-		_threat = [_group, _meta] call RAP_fnc_identifyThreatForMovement;
+		_threat = [_group, 500, _actionMeta] call RAP_fnc_identifyThreatForMovement;
 		!isNil "_threat";
 	};
 
@@ -77,7 +94,7 @@ RAP_fnc_neutralizeMovementThreat = {
 };
 
 RAP_fnc_moveController = {
-	params ["_group", "_targetPos", "_meta"];
+	params ["_group", "_targetPos", "_actionMeta"];
 
 	/**
 		The flow of move:
@@ -94,166 +111,64 @@ RAP_fnc_moveController = {
 		6) When all groups have reached the destination, actiion is completed
 	*/
 
+	[_actionMeta, "PHASE", "INIT"] call CBA_fnc_hashSet;
 	// Start by clearing any waypoints
 	[_group] call CBA_fnc_clearWaypoints;
 
 	//Defend the current location while pre movement phase is being processed
 	[_group, _group, 50, 3, 0.25] call CBA_fnc_taskDefend;
 
-	private _movementType = [_meta, "movementType"] call CBA_fnc_hashGet;
+	[_group, _targetPos, _actionMeta] call RAP_fnc_preMove;
 
-	while {true} do {
-		//private _preMoveHandle = [_group, _targetPos] spawn RAP_fnc_preMove;
+	// AFter pre-move, group should be inside a transportation if such was available
+	[_group] call CBA_fnc_clearWaypoints;
 
-		//waitUntil { scriptDone _preMoveHandle };
-
-		[_group, _targetPos, _meta] call RAP_fnc_preMove;
-
-		[_group] call CBA_fnc_clearWaypoints;
-
-		[_group, _targetPos, _meta] call RAP_fnc_move;
-		
-		private _nearestEnemy = nil;
-		private _moveCompleted = false;
-		// This check will run until a near target is revealed, move is completed or the script is terminated from outside
-		waitUntil {
-			sleep 10;
-
-			_nearestEnemy = [_group, _meta] call RAP_fnc_identifyThreatForMovement;
-			_moveCompleted = [_meta, "moveCompleted"] call CBA_fnc_hashGet;
-			!isNil "_nearestEnemy" OR !isNil "_moveCompleted";
-		};
-
-		if (!isNil "_nearestEnemy") then {
-			[_group, _nearestEnemy, _meta] call RAP_fnc_neutralizeMovementThreat;
-
-			// Movement no longer compromised, ready for the next round (i.e. start movement from start)
-		};
-
-		if (_moveCompleted) exitWith { true };
-	};
-};
-
-RAP_fnc_moveControlTester = {
-	params ["_location"];
-	//private _testGroup = (missionNamespace getVariable ["PatrolMainForce", objNull]) call CBA_fnc_getGroup;
-	private _testGroup = [RAP_PATROL_FORCE, "mainGroup"] call CBA_fnc_hashGet;
-	private _testHash = [] call CBA_fnc_hashCreate;
-	[_testGroup, _location, _testHash] spawn RAP_fnc_moveController;
-
-	_testHash;
-};
-
-RAP_fnc_getForce = {
-	params ["_forceIdentifier"];
-
-	[RAP_PATROL_FORCE, _forceIdentifier] call CBA_fnc_hashGet;
-};
-
-RAP_fnc_createNewForce = {
-	params ["_forceIdentifier", "_groups", "_attachedAssets"];
-
-	[RAP_PATROL_FORCE, _forceIdentifier, [_groups, _attachedAssets, nil]] call CBA_fnc_hashSet;
-};
-
-RAP_fnc_getActionParam = {
-	params ["_forceIdentifier", "_task", "_param"];
-
-	RAP_PATROL_ACTION_PARAMS;
-};
-
-
-// SAVED FOR POSSIBLE LATER USE
-/**
-RAP_fnc_movementMonitor = {
-	params ["_group", "_movementHandle", "_meta"];
-
-	// This check will run until a near target is revealed or the script is terminated from outside
-	private _nearestEnemy = nil;
-	waitUntil {
-		sleep 10;
-
-		_nearestEnemy = [_group, _meta] call RAP_fnc_identifyThreatForMovement;
-		!isNil "_nearestEnemy";
-	};
-
-	// Possibly dangerous target is recognized, what to do?
-
-	[_meta, "movementCompromised", true] call CBA_fnc_hashSet;
-	// Terminate movement handling, movement must be resumed after the threat has been dealt with
-	terminate _movementHandle;
-	// Delete remaining waypoints
-	for [{private _index = (count (waypoints _group)) - 1}, {_index > 0}, {_index = _index - 1}] do {
-		deleteWaypoint [_group, _index];
-	}; 
-
-	private _neutralizeHandle = [_group, _nearestEnemy] spawn RAP_fnc_neutralizeMovementThreat;
-
-	// Add script handle to meta hash map so that it can also be terminated from outside
-	[_meta, "neutralizeHandle", _neutralizeHandle] call CBA_fnc_hashSet;
-	// Wait for the neutralization
-	waitUntil { scriptDone _neutralizeHandle };
-
-	[_meta, "neutralizeHandle"] call CBA_fnc_hashRem;
-
-	// Movement no longer compromised, ready for the next round
-	[_meta, "movementCompromised", false] call CBA_fnc_hashSet;
-};
-
-RAP_fnc_move = {
-	params ["_groups", "_targetPos"];
-
-	{
-		_x params ["_group"];
-
-		private _destination = [_targetPos, 10, 50] call BIS_fnc_findSafePos;
-
-		private _wp = [_group, _destination, 10, "MOVE", "AWARE", "WHITE", "STAG COLUMN"] call CBA_fnc_addWaypoint;
-		_wp setWaypointStatements ["true", "hint 'hello'; hint 'goodbye'"];
-		_wp setWaypointCompletionRadius 5;
-	} forEach _groups;
-};
-
-RAP_fnc_preMove = {
-	params ["_force", "_targetPos"];
-
-	_force params ["_groups", "_attachedAssets", "_attachedTransportation"];
-
-	// Measure each group's dist to target, sort them in descending order and take first
-	private _farthestAway = ((_groups apply {[_x, _targetPos] call CBA_fnc_getDistance}) sort false) select 0;
-
-	if (_farthestAway > 500) then {
-		// We really should call a transport...
-	};
-};
-
-RAP_fnc_movementMonitor = {
-	params ["_groups", "_movementHandle"];
+	[_group, _targetPos, _actionMeta] call RAP_fnc_move;
 
 	waitUntil {
-		sleep 10;
-
-		private _expression = _groups findIf {
-			(_x nearTargets 400) findIf {
-				(_x select 2) == east;
-			};
-		};
-		!isNil "_expression" && { _expression != -1 };
+		sleep 5;
+		private _moveCompleted = [_actionMeta, "moveCompleted"] call CBA_fnc_hashGet;
+		!isNil "_moveCompleted" && _moveCompleted;
 	};
+
+	[_actionMeta, "PHASE", "POST"] call CBA_fnc_hashSet;
+	// TODO: Secure end point for a set amount of time
+	[_actionMeta, "COMPLETE", true] call CBA_fnc_hashSet;
 };
 
-RAP_fnc_moveController = {
-	params ["_forceIdentifier", "_targetPos", "_meta"];
+RAP_fnc_moveContingencyController = {
+	params ["_group", "_targetPos", "_moveHandle", "_actionMeta"];
+	private _threat = nil;
 
-	private _force = _forceIdentifier call RAP_fnc_getForce;
-	_force params ["_groups"];
+	waitUntil {
+		_threat = [_group, 400, _actionMeta] call RAP_fnc_identifyThreatForMovement;
+		!isNil "_threat";
+	};
 
-	private _preMoveHandle = [_force, _targetPos] spawn RAP_fnc_preMove;
+	// A threat has been identified, deal with it
+	[_actionMeta, "COMPROMISED", true] call CBA_fnc_hashSet;
+	// Terminate move handle
+	terminate _moveHandle;
+	[_group, _threat, _actionMeta] call RAP_fnc_neutralizeMovementThreat;
 
-	waitUntil { scriptDone _preMoveHandle };
-
-	private _groupsToMove = [_forceIdentifier, RAP_PATROL_ACTION_MOVE, "groupsToMove"];
-	private _movementHandle = [_groupsToMove, _targetPos] spawn RAP_fnc_move;
-	private _movementMonitor = [_groups, _movementHandle] spawn RAP_fnc_movementMonitor;
+	// Threats have been neutralized, should init move again
+	[_actionMeta, "COMPROMISED"] call CBA_fnc_hashRem;
+	[_actionMeta, "COMPROMISE-ELAPSED"] call CBA_fnc_hashRem;
+	[_group, _targetPos, _actionMeta] call RAP_fnc_actionsMoveInit;
 };
- */
+
+RAP_fnc_actionsMoveInit = {
+	params ["_group", "_targetPos", "_actionMeta"];
+
+	/**
+		INITING MOVE ACTION
+
+		(1) Start actual move
+		(2) Start contingency controller
+	*/
+
+	private _moveHandle = [_group, _targetPos, _actionMeta] spawn RAP_fnc_moveController;
+	[_actionMeta, "HANDLES", _moveHandle] call RAP_fnc_pushBackToHash;
+	private _contingencyHandle = [_group, _moveHandle, _actionMeta] spawn RAP_fnc_moveContingencyController;
+	[_actionMeta, "HANDLES", _contingencyHandle] call RAP_fnc_pushBackToHash;
+};

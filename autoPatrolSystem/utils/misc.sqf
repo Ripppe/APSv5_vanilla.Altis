@@ -22,3 +22,16 @@ RAP_fnc_isEmptyArray = {
 	params [["_array", []]];
 	count _array == 0;
 };
+
+RAP_fnc_pushBackToHash = {
+	params ["_hash", "_key", "_value"];
+
+	private _existingValue = [_hash, _key] call CBA_fnc_hashGet;
+
+	if (!isNil "_existingValue") then {
+		private _arr = [_existingValue];
+		[_hash, _key, _arr] call CBA_fnc_hashSet;
+	} else {
+		_existingValue pushBack _value;
+	};
+};
