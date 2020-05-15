@@ -100,11 +100,15 @@ RAP_fnc_selectPatrolType = {
 RAP_fnc_selectPatrolZone = {
 	params ["_patrolType"];
 
-	RAP_G_PATROL_ZONE_DISTANCE params ["_minDist", "_maxDist"];
-	([RAP_G_PATROL_TYPE_DATA, _patrolType] call CBA_fnc_hashGet) params ["_suitableLocations"];
+	["Selecting suitable locations for patrol type: %1", [_patrolType]] call RAP_fnc_debugLog;
+	
+	([RAP_G_PATROL_TYPE_DATA, _patrolType] call CBA_fnc_hashGet) params ["_suitableLocations", "_distance"];
+	_distance params ["_minDist", "_maxDist"];
+	["Suitable location types: %1, distance: %2 - %3", [_suitableLocations, _minDist, _maxDist]] call RAP_fnc_debugLog;
 
 	private _possibleLocations = nearestLocations [RAP_BASE_CENTER_LOCATION, _suitableLocations, _maxDist];
-	
+	["Number of locations: %1", [count _possibleLocations]] call RAP_fnc_debugLog;
+
 	//TODO: Backup mechanism for situations where there are no suitable locations found
 	[_possibleLocations, true] call CBA_fnc_shuffle;
 	private _selectedLocation = _possibleLocations findIf {
@@ -113,11 +117,13 @@ RAP_fnc_selectPatrolZone = {
 	};
 
 	private _selectedLocation = if (_selectedLocation == -1) then {
+		["No matching locations with min distance (%1). Selecting random from possible locations.", [_minDist]] call RAP_fnc_debugLog;
 		selectRandom _possibleLocations;
 	} else {
 		_possibleLocations select [_selectedLocation];
 	};
 
+	["Selected location: %1", [_selectedLocation]] call RAP_fnc_debugLog;
 	locationPosition _selectedLocation;
 };
 
