@@ -32,4 +32,12 @@ RAP_fnc_actionsCombineUnitsToGroup = {
 	_group;
 };
 
+RAP_fnc_actionsSubtractUnitsFromAction = {
+	params ["_numberOfUnits", "_actionMeta"];
+};
+
+RAP_fnc_actionsReinforceActionWithUnits = {
+	params ["_units", "_actionMeta"];
+};
+
 execVM "autoPatrolSystem\actions\move.sqf";
