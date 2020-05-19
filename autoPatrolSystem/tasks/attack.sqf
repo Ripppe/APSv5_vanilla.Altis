@@ -1,5 +1,5 @@
 RAP_fnc_tasksAttackInit = {
-	params ["_originalObjPos", "_originalObjParams", "_force", "_commandMeta"];
+	params ["_originalObjPos", "_originalObjParams", "_commandMeta"];
 	scriptName "RAP_fnc_taskAttack";
 
 	_originalObjParams params ["_redZoneRadius"];
@@ -17,7 +17,8 @@ RAP_fnc_tasksAttackInit = {
 
 	// (2) MOVE FORCE TO FUP
 	private _actionMeta = [_commandMeta] call RAP_fnc_actionsInitMeta;
-	[_force, _originalObjPos, _actionMeta] call RAP_fnc_actionsMoveInit;
+	private _units = [_commandMeta, "UNITS"] call CBA_fnc_hashGet;
+	[_units, _originalObjPos, _actionMeta] call RAP_fnc_actionsMoveInit;
 
 	waitUntil {
 		[_actionMeta, "COMPLETE"] call CBA_fnc_hashGet;

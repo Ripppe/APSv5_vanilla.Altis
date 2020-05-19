@@ -160,7 +160,7 @@ RAP_fnc_moveContingencyController = {
 };
 
 RAP_fnc_actionsMoveInit = {
-	params ["_group", "_targetPos", "_actionMeta"];
+	params ["_units", "_targetPos", "_actionMeta"];
 
 	/**
 		INITING MOVE ACTION
@@ -170,6 +170,7 @@ RAP_fnc_actionsMoveInit = {
 	*/
 
 	[_actionMeta] call RAP_fnc_actionsResetHandles;
+	private _group = [_units, nil, [_actionMeta, "SIDE"] call CBA_fnc_hashGet] call RAP_fnc_actionsCombineUnitsToGroup;
 	private _moveHandle = [_group, _targetPos, _actionMeta] spawn RAP_fnc_moveController;
 	[_actionMeta, "HANDLES", _moveHandle] call RAP_fnc_pushBackToHash;
 	private _contingencyHandle = [_group, _moveHandle, _actionMeta] spawn RAP_fnc_moveContingencyController;

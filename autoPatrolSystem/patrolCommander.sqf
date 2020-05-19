@@ -1,5 +1,20 @@
 RAP_fnc_patrolCommanderInit = {
-	params ["_objective", "_force"];
+	params ["_objective", "_force", "_side"];
+
+	private _patrolUnits = [];
+	{
+		_patrolUnits append (units _x);
+	} forEach _force;
+
+	private _commandMeta = [[["UNITS", _patrolUnits],
+	["SIDE", _side]]] call CBA_fnc_hashCreate;
+
+	[_objective, _commandMeta] spawn RAP_fnc_patrolCommanderProcess;
+	
+};
+
+RAP_fnc_patrolCommanderProcess = {
+	params ["_objective", "_commandMeta"];
 
 	_objective params ["_originalObjType", "_originalObjPos", "_originalObjParams"];
 
@@ -18,7 +33,7 @@ RAP_fnc_patrolCommanderInit = {
 		private _taskHandle = nil;
 		switch (_originalObjType) do {
 			case RAP_PATROL_TASK_ATTACK: {
-				_taskHandle = [_originalObjPos, _originalObjParams, _force, RAP_PATROL_FORCE_META] 
+				_taskHandle = [_originalObjPos, _originalObjParams, RAP_PATROL_FORCE_META] 
 				spawn RAP_fnc_tasksAttackInit;
 				[_taskHandle] call RAP_fnc_patrolCommanderAddHandle;
 			};
@@ -55,15 +70,15 @@ RAP_fnc_patrolCommanderTerminateTask = {
 };
 
 RAP_fnc_patrolCommanderAddHandle = {
-	params ["_handle"];
+	params ["_handle", "_commandMeta"];
 
-	[RAP_PATROL_FORCE_META, "HANDLES", _handle] call RAP_fnc_pushBackToHash;
+	[_commandMeta, "HANDLES", _handle] call RAP_fnc_pushBackToHash;
 };
 
 RAP_fnc_patrolCommanderTerminate = {
-	params ["_commanderHandle"];
+	params ["_commanderHandle", "_commandMeta"];
 
-	[RAP_PATROL_FORCE_META] call RAP_fnc_patrolCommanderTerminateTask;
+	[_commandMeta] call RAP_fnc_patrolCommanderTerminateTask;
 
 	if (!scriptDone _commanderHandle) then {
 		terminate _commanderHandle;
