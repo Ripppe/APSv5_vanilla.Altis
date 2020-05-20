@@ -165,8 +165,11 @@ RAP_fnc_actionsMoveInit = {
 	/**
 		INITING MOVE ACTION
 
-		(1) Start actual move
-		(2) Start contingency controller
+		(*) Check if all of the units are within certain distance from each other
+			-> make groups accrodingly and init separate move actions for each
+		(*) Start actual move
+			- As a pre-move phase, check if groups are in contact (and do they need to disengage)
+		(*) Start contingency controller
 	*/
 
 	[_actionMeta] call RAP_fnc_actionsResetHandles;

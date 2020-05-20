@@ -14,9 +14,7 @@ RAP_fnc_patrolCommanderInit = {
 };
 
 RAP_fnc_patrolCommanderProcess = {
-	params ["_objective", "_commandMeta"];
-
-	_objective params ["_originalObjType", "_originalObjPos", "_originalObjParams"];
+	params ["_objective", "_objectiveParams", "_commandMeta"];
 
 	/** 
 		Commander should supervise what info tasks give back and act accordingly.
@@ -27,52 +25,65 @@ RAP_fnc_patrolCommanderProcess = {
 		movement contingency plan.
 	*/
 
-	private _tasksCompleted = false;
+	private _allTasksCompleted = false;
+	[_commandMeta, _objective, _objectiveParams] call RAP_fnc_patrolCommanderInitTask;
 	
-	while {!_tasksCompleted} do {
-		private _taskHandle = nil;
-		switch (_originalObjType) do {
-			case RAP_PATROL_TASK_ATTACK: {
-				_taskHandle = [_originalObjPos, _originalObjParams, RAP_PATROL_FORCE_META] 
-				spawn RAP_fnc_tasksAttackInit;
-				[_taskHandle] call RAP_fnc_patrolCommanderAddHandle;
-			};
-			default { };
-		};
-
+	while {!_allTasksCompleted} do {
 		waitUntil {
-			
 			sleep 10;
-			if (scriptDone _taskHandle || isNil "_taskHandle") then {
-				_tasksCompleted = true;
+
+			private _firstUndoneTask = ([_commandMeta, "TASKS"] call CBA_fnc_hashGet) findIf { !scriptDone _x };
+			if (_firstUndoneTask == -1) then {
+				_allTasksCompleted = true;
 			};
 
-			_tasksCompleted;
+			_allTasksCompleted;
 		};
 	};
 };
 
+RAP_fnc_patrolCommanderInitTask = {
+	params ["_commandMeta", "_units", "_taskType", ["_taskParams", []]];
+
+	private _newTaskParams = +_taskParams;
+	private _taskMeta = [[["TYPE", _taskType], ["PARAMS", _newTaskParams], ["UNITS", _units]]] call CBA_fnc_hashCreate;
+	private _taskHandle = nil;
+	switch (_taskType) do {
+		case RAP_PATROL_TASK_ATTACK: {
+			_taskHandle = _newTaskParams spawn RAP_fnc_tasksAttackInit;
+		};
+		default { };
+	};
+
+	[_taskMeta, "HANDLE", _taskHandle] call CBA_fnc_hashSet;
+	[_commandMeta, _taskMeta] call RAP_fnc_patrolCommanderAddTask;
+};
+
+/** Terminating a task involves:
+	- terminating all action handles (possibly an own function for each action type?)
+	- terminating task handle
+ */
 RAP_fnc_patrolCommanderTerminateTask = {
 	params ["_commandMeta"];
 
-	{
-		if (!scriptDone _x) then {
-			terminate _x;
-		};
-	} forEach ([_commandMeta, "HANDLES"] call CBA_fnc_hashGet);
+	// {
+	// 	if (!scriptDone _x) then {
+	// 		terminate _x;
+	// 	};
+	// } forEach ([_commandMeta, "HANDLES"] call CBA_fnc_hashGet);
 
-	private _actionMeta = [_commandMeta, "ACTION"] call CBA_fnc_hashGet;
+	// private _actionMeta = [_commandMeta, "ACTION"] call CBA_fnc_hashGet;
 
-	[_actionMeta] call RAP_fnc_actionsResetHandles;
+	// [_actionMeta] call RAP_fnc_actionsResetHandles;
 
-	[_commandMeta, "ACTION", nil] call CBA_fnc_hashSet;
-	[_commandMeta, "HANDLES", nil] call CBA_fnc_hashSet;
+	// [_commandMeta, "ACTION", nil] call CBA_fnc_hashSet;
+	// [_commandMeta, "HANDLES", nil] call CBA_fnc_hashSet;
 };
 
-RAP_fnc_patrolCommanderAddHandle = {
-	params ["_handle", "_commandMeta"];
+RAP_fnc_patrolCommanderAddTask = {
+	params ["_commandMeta", "_taskMeta"];
 
-	[_commandMeta, "HANDLES", _handle] call RAP_fnc_pushBackToHash;
+	[_commandMeta, "TASKS", _taskMeta] call RAP_fnc_pushBackToHash;
 };
 
 RAP_fnc_patrolCommanderTerminate = {

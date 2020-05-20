@@ -1,10 +1,8 @@
 RAP_fnc_actionsInitMeta = {
-	params ["_commandMeta"];
+	params ["_taskMeta"];
 
-	private _actionMeta = [[
-		["COMPLETE", false], 
-		["SIDE", [_commandMeta, "SIDE"] call CBA_fnc_hashGet]]] call CBA_fnc_hashCreate;
-	[_commandMeta, "ACTION", _actionMeta] call CBA_fnc_hashSet;
+	private _actionMeta = [[["COMPLETE", false]]] call CBA_fnc_hashCreate;
+	[_taskMeta, "ACTIONS", _actionMeta] call RAP_fnc_pushBackToHash;
 
 	_actionMeta;
 };
